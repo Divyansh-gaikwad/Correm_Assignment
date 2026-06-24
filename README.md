@@ -118,3 +118,12 @@ Flask APIs are best deployed to Render, Railway, or Heroku.
 2. Set the **Root Directory** to `server`.
 3. Build Command: `pip install -r requirements.txt`
 4. Start Command: `gunicorn shii:app` (Make sure to add `gunicorn` to `requirements.txt` first).
+
+## AI Assistance & Acknowledgements
+
+This project was developed with the assistance of AI, specifically using **Gemini 3.5 Flash (Medium)** (via the Antigravity IDE agent by Google DeepMind). The AI was utilized for:
+
+- **Project Restructuring & Scaffolding:** Organizing the codebase into a clean `client/` and `server/` architecture.
+- **Frontend Development:** Designing and implementing the premium glassmorphic React dashboard, writing custom CSS, and building the data visualization components.
+- **Backend Enhancements:** Enhancing the existing Flask backend with CORS support and building the `/api/upload` endpoint to seamlessly connect with the frontend.
+- **Documentation & Planning:** Generating comprehensive implementation plans, task checklists, and this detailed README.
