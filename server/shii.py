@@ -3,7 +3,7 @@ import re
 import io
 import pandas as pd
 import pdfplumber
-from flask import Flask, request, send_file, render_template, flash, redirect
+from flask import Flask, request, send_file
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -191,61 +191,9 @@ def process_hdfc_statement(pdf_stream):
     return df_meta, df_ledger, df_summary, df_monthly, df_top5, df_insights
 
 
-@app.route('/', methods=['GET', 'POST'])
-def upload_file():
-    if request.method == 'POST':
-        if 'pdf' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-            
-        file = request.files['pdf']
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-            
-        if file and file.filename.lower().endswith('.pdf'):
-            try:
-                # Process DataFrames
-                df_meta, df_ledger, df_summary, df_monthly, df_top5, df_insights = process_hdfc_statement(file)
-                
-                output = io.BytesIO()
-                with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                    # Sheet 1
-                    df_meta.to_excel(writer, sheet_name='Account Details', index=False)
-                    
-                    # Sheet 2
-                    df_ledger.to_excel(writer, sheet_name='Transaction Ledger', index=False)
-                    
-                    # Sheet 3 (Assembling multiple analytic blocks side-by-side or stacked)
-                    df_summary.to_excel(writer, sheet_name='Category Summary & Analytics', index=False, startrow=0)
-                    
-                    # Stack additional analytical blocks down the page with space
-                    start_r = len(df_summary) + 3
-                    writer.sheets['Category Summary & Analytics'].cell(row=start_r, column=1, value="MONTH-WISE TRENDS")
-                    df_monthly.to_excel(writer, sheet_name='Category Summary & Analytics', index=False, startrow=start_r)
-                    
-                    start_r += len(df_monthly) + 3
-                    writer.sheets['Category Summary & Analytics'].cell(row=start_r, column=1, value="TOP 5 LARGEST TRANSACTIONS")
-                    df_top5.to_excel(writer, sheet_name='Category Summary & Analytics', index=False, startrow=start_r)
-
-                    start_r += len(df_top5) + 3
-                    writer.sheets['Category Summary & Analytics'].cell(row=start_r, column=1, value="RECURRING PATTERN DETECTION STATS")
-                    df_insights.to_excel(writer, sheet_name='Category Summary & Analytics', index=False, startrow=start_r)
-                
-                output.seek(0)
-                base_name = os.path.splitext(file.filename)[0]
-                return send_file(
-                    output, 
-                    as_attachment=True, 
-                    download_name=f"{base_name}_Analyzed.xlsx",
-                    mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-                )
-                
-            except Exception as e:
-                flash(f"Error processing document: {str(e)}")
-                return redirect(request.url)
-                
-    return render_template('index.html')
+@app.route('/', methods=['GET'])
+def index():
+    return "Server is running"
 
 
 @app.route('/api/upload', methods=['POST'])
@@ -310,5 +258,5 @@ def api_upload_file():
         return {"success": False, "error": str(e)}, 500
 
 
-if __name__ == "__main__":
+if __name__ == "__main__": 
     app.run(debug=True, port=5000)
